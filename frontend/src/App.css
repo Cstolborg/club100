@@ -1,0 +1,85 @@
+.App {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+}
+
+.loading h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(45deg, #1db954, #1ed760);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.loading p {
+  color: #888;
+  font-size: 1.2rem;
+}
+
+/* Spotify green color theme */
+:root {
+  --spotify-green: #1db954;
+  --spotify-green-hover: #1ed760;
+  --spotify-dark: #191414;
+  --spotify-light: #282828;
+}
+
+button.primary {
+  background-color: var(--spotify-green);
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 500px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button.primary:hover {
+  background-color: var(--spotify-green-hover);
+  transform: scale(1.05);
+}
+
+button.secondary {
+  background-color: transparent;
+  color: white;
+  border: 2px solid white;
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 500px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button.secondary:hover {
+  background-color: white;
+  color: #000;
+  transform: scale(1.05);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.error {
+  background-color: #e74c3c;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  margin: 16px 0;
+}

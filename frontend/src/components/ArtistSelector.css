@@ -1,0 +1,255 @@
+.artist-selector {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(45deg, #1db954, #1ed760);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header p {
+  color: #b3b3b3;
+  font-size: 1.1rem;
+}
+
+.player-status {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  background-color: rgba(29, 185, 84, 0.1);
+  color: #1db954;
+  display: inline-block;
+  font-size: 0.9rem;
+}
+
+.player-status.connecting {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+}
+
+.selection-progress {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1db954, #1ed760);
+  transition: width 0.3s ease;
+}
+
+.search-section {
+  margin-bottom: 2rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 16px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #1db954;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.search-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading-spinner {
+  text-align: center;
+  color: #1db954;
+  padding: 1rem;
+}
+
+.search-results {
+  margin-top: 1rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.artist-result {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.artist-result:hover {
+  background-color: rgba(29, 185, 84, 0.1);
+}
+
+.artist-result:last-child {
+  border-bottom: none;
+}
+
+.artist-result img,
+.artist-result .no-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.artist-result .no-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 24px;
+}
+
+.artist-result span {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.selected-artists {
+  margin-bottom: 2rem;
+}
+
+.selected-artists h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #1db954;
+}
+
+.artists-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .artists-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.selected-artist {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.selected-artist.empty {
+  opacity: 0.3;
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  background-color: transparent;
+}
+
+.selected-artist:not(.empty) {
+  border: 2px solid #1db954;
+}
+
+.artist-number {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background-color: #1db954;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.selected-artist img,
+.selected-artist .no-image {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-bottom: 0.5rem;
+}
+
+.selected-artist .no-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 48px;
+}
+
+.artist-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.artist-name {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.remove-btn {
+  background-color: rgba(231, 76, 60, 0.2);
+  border: none;
+  color: #e74c3c;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.remove-btn:hover {
+  background-color: #e74c3c;
+  color: white;
+  transform: scale(1.1);
+}
+
+.confirm-btn {
+  width: 100%;
+  font-size: 18px;
+  padding: 16px;
+}

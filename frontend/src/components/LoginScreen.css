@@ -1,0 +1,105 @@
+.login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+}
+
+.login-content {
+  max-width: 600px;
+  text-align: center;
+}
+
+.logo {
+  font-size: 5rem;
+  font-weight: 900;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(45deg, #1db954, #1ed760);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -2px;
+}
+
+.tagline {
+  font-size: 1.5rem;
+  color: #1db954;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.description {
+  margin-bottom: 3rem;
+  color: #b3b3b3;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.login-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  padding: 16px 48px;
+  margin-bottom: 3rem;
+}
+
+.login-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.requirements {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.requirements strong {
+  color: #1db954;
+  font-size: 1.1rem;
+}
+
+.requirements ul {
+  list-style: none;
+  margin-top: 0.5rem;
+}
+
+.requirements li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  color: #e0e0e0;
+}
+
+.requirements li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #1db954;
+  font-weight: bold;
+}
+
+.disclaimer {
+  background-color: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: left;
+}
+
+.disclaimer strong {
+  color: #e74c3c;
+  font-size: 1.1rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.disclaimer p {
+  color: #e0e0e0;
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}

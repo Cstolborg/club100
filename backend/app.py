@@ -174,8 +174,8 @@ async def callback(code: Optional[str] = Query(None), error: Optional[str] = Que
             token_data["expires_in"]
         )
 
-        # Redirect to frontend
-        frontend_url = "http://localhost:3000/"
+        # Redirect to frontend (Vite default port)
+        frontend_url = "http://127.0.0.1:5173/"
         return RedirectResponse(url=frontend_url)
 
     except httpx.HTTPStatusError as e:
@@ -335,12 +335,50 @@ async def get_tracks(request: ArtistIdsRequest):
 # PHASE 4: PLAYBACK CONTROL ENDPOINT
 # ============================================================================
 
+@app.get("/api/devices")
+async def get_devices():
+    """
+    Get list of available Spotify devices.
+    Used to verify that the Web Playback SDK device is registered with Spotify.
+    """
+    try:
+        access_token = await get_fresh_token(
+            token_storage,
+            SPOTIFY_CLIENT_ID,
+            SPOTIFY_CLIENT_SECRET
+        )
+
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://api.spotify.com/v1/me/player/devices",
+                headers={"Authorization": f"Bearer {access_token}"}
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            return {
+                "devices": data.get("devices", [])
+            }
+
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail=f"Failed to get devices: {e.response.text}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get devices: {str(e)}"
+        )
+
+
 @app.post("/api/play-minute")
 async def play_minute(request: PlayMinuteRequest):
     """
     Start playback of a track at the calculated 'drop' position.
     Position is calculated as ~60% into the track with safety checks.
     """
+    print(f"🎵 PLAY-MINUTE ENDPOINT HIT: device={request.device_id[:20]}..., track={request.track_uri}")
     try:
         access_token = await get_fresh_token(
             token_storage,
