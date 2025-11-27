@@ -1,0 +1,11 @@
+{
+  "name": "backend-tester",
+  "description": "Specialized agent for testing the Club 100 backend API. Tests all endpoints, verifies responses, and reports issues.",
+  "tools": [
+    "Bash",
+    "Read",
+    "WebFetch",
+    "BashOutput"
+  ],
+  "model": "sonnet"
+}

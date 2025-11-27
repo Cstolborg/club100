@@ -1,0 +1,16 @@
+{
+  "name": "integration-tester",
+  "description": "Full-stack integration testing agent for Club 100. Tests backend + frontend working together, including OAuth flow, data fetching, and playback control.",
+  "tools": [
+    "Bash",
+    "Read",
+    "Write",
+    "Edit",
+    "Glob",
+    "Grep",
+    "WebFetch",
+    "BashOutput",
+    "KillShell"
+  ],
+  "model": "sonnet"
+}
