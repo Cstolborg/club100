@@ -109,7 +109,15 @@ The repository currently contains:
 2. **Security**:
    - NEVER log access tokens or refresh tokens
    - NEVER expose `SPOTIFY_CLIENT_SECRET` in responses
-   - Use CORS middleware to restrict frontend origin
+   - Use CORS middleware with multiple allowed origins:
+     ```python
+     origins = [
+         "http://localhost:3000",
+         "http://localhost:5173",  # Vite default
+         "http://127.0.0.1:3000",
+         "http://127.0.0.1:5173",
+     ]
+     ```
    - Validate all input parameters
 
 3. **Token Management**:
@@ -155,20 +163,40 @@ The repository currently contains:
    - Must call `player.connect()` after initialization
    - Device may take 2-3 seconds to appear in Spotify
    - Browser autoplay policies require user interaction first
+   - **Fix**: Show device name to user and confirm before starting game
 
 2. **Timer Accuracy**:
-   - `setInterval` can drift over time
-   - Consider using `setTimeout` recursively for better accuracy
+   - `setInterval` can drift over time (could be off by seconds after 100 minutes)
+   - **Fix**: Use `setTimeout` with drift correction:
+     ```javascript
+     const startTime = Date.now();
+     const tick = () => {
+       const elapsed = Date.now() - startTime;
+       const currentMinute = Math.floor(elapsed / intervalDuration) + 1;
+       // Update state and schedule next tick
+       const nextTick = (currentMinute * intervalDuration) - elapsed;
+       setTimeout(tick, nextTick);
+     };
+     ```
    - Account for network latency in playback calls
 
 3. **Track Playback**:
    - Some tracks may not be playable in certain markets
-   - Handle cases where artist has < 10 top tracks
-   - Ensure `position_ms` doesn't exceed `duration_ms`
+   - Artists may have < 10 top tracks available
+   - **Fix**: Pad track matrix with nulls, handle gracefully in frontend
+   - Ensure `position_ms` doesn't exceed `duration_ms` and has minimum play time
+   - **Fix**: `position_ms = max(0, min(position_ms, duration_ms - 10000))`
 
 4. **CORS Issues**:
-   - Backend must enable CORS for `http://localhost:3000`
+   - Backend must enable CORS for multiple frontend ports (Vite uses 5173 by default)
+   - **Fix**: Allow `localhost:3000`, `localhost:5173`, and `127.0.0.1` variants
    - Spotify API calls must be server-side (no CORS on Spotify API)
+
+5. **Error Handling**:
+   - Spotify API may be down or rate-limited
+   - Network connection may drop mid-game
+   - Device may disconnect
+   - **Fix**: Pause game on errors, show retry modal, save state to localStorage
 
 ---
 
@@ -177,11 +205,12 @@ The repository currently contains:
 When building from scratch, implement in this order:
 
 ### Phase 1: Backend Foundation
+- [ ] Create `backend/.gitignore` (exclude .env, venv, __pycache__)
 - [ ] Create `backend/requirements.txt` with dependencies
 - [ ] Create `backend/.env.example` template
 - [ ] Implement basic FastAPI app in `backend/app.py`
 - [ ] Implement token storage structure
-- [ ] Add CORS middleware
+- [ ] Add CORS middleware for multiple ports (3000, 5173, 127.0.0.1 variants)
 
 ### Phase 2: Spotify Authentication
 - [ ] Implement `GET /login` endpoint
@@ -194,18 +223,21 @@ When building from scratch, implement in this order:
 - [ ] Implement `GET /api/search` for artist search
 - [ ] Implement `POST /api/tracks` for fetching top tracks
 - [ ] Test with real Spotify data
-- [ ] Handle edge cases (< 10 tracks, missing data)
+- [ ] Handle edge cases: pad to 10 tracks if artist has fewer, handle null tracks
+- [ ] Implement exponential backoff for rate limiting (429 errors)
 
 ### Phase 4: Playback Control
 - [ ] Implement `POST /api/play-minute` endpoint
-- [ ] Test position calculation logic
+- [ ] Fix position calculation: `max(0, min(position_ms, duration_ms - 10000))`
+- [ ] Test position calculation with short tracks (< 75 seconds)
 - [ ] Verify playback starts at correct position
 
 ### Phase 5: Frontend Foundation
+- [ ] Create `frontend/.gitignore` (exclude node_modules, dist, .env.local)
 - [ ] Create React app structure (Vite recommended)
 - [ ] Add Spotify SDK script to `index.html`
 - [ ] Create basic routing/navigation structure
-- [ ] Set up API service module
+- [ ] Set up API service module with error handling
 
 ### Phase 6: Frontend Components
 - [ ] Build `LoginScreen` component
@@ -219,16 +251,20 @@ When building from scratch, implement in this order:
 - [ ] Test player connection and playback
 
 ### Phase 8: Game Logic
-- [ ] Implement 100-minute timer
+- [ ] Implement timer with drift correction (setTimeout not setInterval)
+- [ ] Add test mode: 20 rounds × 10 seconds (configurable)
 - [ ] Implement minute-to-track mapping
-- [ ] Integrate playback API calls
-- [ ] Add visual feedback (DRINK! message)
+- [ ] Integrate playback API calls with error handling
+- [ ] Add visual feedback (DRINK! message, progress bar, album art)
+- [ ] Save game state to localStorage for recovery
 
 ### Phase 9: Polish
 - [ ] Add styling and UI improvements
 - [ ] Implement pause/resume functionality
-- [ ] Add progress indicators
-- [ ] Test full 100-minute flow (or abbreviated test)
+- [ ] Add device confirmation dialog before starting
+- [ ] Add volume control (set to consistent level)
+- [ ] Add error boundary component for graceful failures
+- [ ] Test full 100-minute flow and test mode (20 rounds)
 
 ---
 
@@ -355,10 +391,11 @@ Implement these endpoints:
      - `name`
      - `image` (optional, first or best image URL)
 
-5. `POST /api/tracks`  
+5. `POST /api/tracks`
    - Input: JSON array of exactly 10 Spotify artist IDs.
    - For each artist, fetch their top tracks (up to 10) for a given market (e.g. `US`).
    - Construct a 10×10 structure: 10 artists × 10 tracks.
+   - **Important**: If an artist has fewer than 10 tracks, pad with `null` values to maintain array structure.
    - Each track object must include:
      - `uri`
      - `name`
@@ -366,32 +403,40 @@ Implement these endpoints:
      - `artist_name`
      - `album_image` (if available)
    - Return this structure in JSON.
+   - Implement exponential backoff for rate limiting (429 errors).
 
-6. `POST /api/play-minute`  
+6. `POST /api/play-minute`
    - Input JSON:
-     
+
          {
            "device_id": "...",
            "track_uri": "...",
            "duration_ms": 200000
          }
-     
-   - Compute:
-     
+
+   - Compute position with safety checks:
+
          position_ms = min(0.6 * duration_ms, duration_ms - 45000)
-     
+         position_ms = max(0, min(position_ms, duration_ms - 10000))
+
+     This ensures:
+     - Never negative
+     - At least 10 seconds of playback remaining
+     - Handles short tracks (< 75 seconds) gracefully
+
    - Issue a PUT request to:
-     
+
          /v1/me/player/play?device_id=<device_id>
-     
+
      with JSON body:
-     
+
          {
            "uris": [track_uri],
            "position_ms": position_ms
          }
-     
+
    - Return a simple JSON response, e.g. `{ "status": "ok" }`.
+   - Handle errors (rate limits, network issues) with proper status codes.
 
 ---
 
@@ -443,26 +488,38 @@ Implement at least these logical components/screens:
 3. `GameScreen`
    - Uses the 10×10 tracks and `device_id`.
    - Shows:
-     - Current minute (1–100).
-     - Current artist name and track name.
-     - Big “DRINK!” text per minute.
-   - Provides a “Start Game” button.
+     - Current round (1–100 or 1–20 in test mode)
+     - Current artist name and track name
+     - Big "DRINK!" text per round
+     - Progress bar showing completion
+     - Album artwork
+   - Provides a "Start Game" button with optional test mode toggle.
    - On start:
-     - Set `minute = 1`.
-     - Immediately call `/api/play-minute` for minute 1:
-       
-           artist_index = (minute - 1) % 10
-           song_index   = (minute - 1) // 10
-       
-     - Start an interval of 60 seconds.
+     - Confirm device with user ("Play on [Device Name]?")
+     - Set `round = 1`.
+     - Immediately call `/api/play-minute` for round 1:
+
+           artist_index = (round - 1) % 10
+           song_index   = (round - 1) // 10
+
+     - Start timer with drift correction (use `setTimeout` not `setInterval`):
+       ```javascript
+       const startTime = Date.now();
+       const tick = () => {
+         const elapsed = Date.now() - startTime;
+         const currentRound = Math.floor(elapsed / intervalMs) + 1;
+         if (currentRound > maxRounds) return; // Game complete
+         // Update UI and trigger playback
+         const nextTick = (currentRound * intervalMs) - elapsed;
+         setTimeout(tick, nextTick);
+       };
+       ```
    - On each tick:
-     - Increment `minute`.
-     - If `minute > 100`:
-       - Clear interval and stop game.
-     - Else:
-       - Compute `artist_index` and `song_index`.
-       - Look up the corresponding track.
-       - Call `/api/play-minute` with `device_id`, `track_uri`, and `duration_ms`.
+     - Compute `artist_index` and `song_index`.
+     - Look up the corresponding track.
+     - If track is `null`, show skip message.
+     - Otherwise call `/api/play-minute` with `device_id`, `track_uri`, and `duration_ms`.
+     - Handle errors: pause game, show retry modal, save state to localStorage.
 
 ---
 
@@ -476,9 +533,34 @@ Mapping minutes to artist/track:
 Timer:
 
 - Runs in the frontend.
-- Minute 1 to 100.
-- 60 seconds per minute tick.
+- Normal mode: 100 rounds × 60 seconds = 100 minutes
+- Test mode: 20 rounds × 10 seconds = 200 seconds (~3.3 minutes)
 - Each tick triggers a call to `/api/play-minute`.
+
+### Test Mode
+
+For practical testing and development, implement a configurable test mode:
+
+**Configuration:**
+- **Rounds**: 20 (instead of 100)
+- **Interval**: 10 seconds (instead of 60)
+- **Total Duration**: 3 minutes 20 seconds
+
+**Implementation:**
+- Add toggle or parameter in frontend to enable test mode
+- Use same game logic, just different constants:
+  ```javascript
+  const config = testMode
+    ? { rounds: 20, intervalMs: 10000 }
+    : { rounds: 100, intervalMs: 60000 };
+  ```
+- Artist/track mapping stays the same, just cycles through first 20 combinations
+- All other functionality remains identical (playback position, API calls, etc.)
+
+**Benefits:**
+- Quick end-to-end testing (3 minutes vs 100 minutes)
+- Easier to debug timer logic and playback synchronization
+- Faster iteration during development
 
 ---
 
