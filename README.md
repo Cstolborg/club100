@@ -182,6 +182,24 @@ Make sure:
 
 ---
 
+## 7. Testing
+
+- **Backend:**  
+  ```bash
+  source backend/.venv/bin/activate
+  cd backend && pytest
+  ```
+  (Covers playback position clamping and token refresh logic.)
+
+- **Frontend:** (Node 18+)  
+  ```bash
+  cd frontend
+  npm test   # runs vitest with jsdom, VITEST_WS_PORT=0
+  ```
+  (Covers GameScreen timer cadence: one playMinute call per round.)
+
+---
+
 ## 7. Notes and Limitations
 
 - Spotify Web Playback SDK requires a Premium account.

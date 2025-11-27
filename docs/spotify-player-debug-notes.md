@@ -24,3 +24,7 @@
 8) **Keep logs minimal & specific**: Log device_id, track_uri, position_ms, and the active screen; avoid logging tokens.
 
 Tip: If the Web Playback SDK says “ready” but the device isn’t visible yet, poll `/api/devices` for ~20–40s before failing; the SDK often lags registration.***
+
+## Tests Added
+- Backend: `backend/tests/test_playback.py` (position clamp for short/normal/long tracks; token refresh path). Run: `source backend/.venv/bin/activate && cd backend && pytest`.
+- Frontend: `frontend/src/components/GameScreen.test.jsx` (one `playMinute` call per round, correct ordering). Run with Node 18+: `cd frontend && npm test` (uses `VITEST_WS_PORT=0`).

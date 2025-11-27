@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { playMinute, getDevices } from '../api';
+import { playMinute } from '../api';
 import './GameScreen.css';
 
 function GameScreen({ artists, tracks, deviceId, player, onBack }) {
@@ -12,6 +12,7 @@ function GameScreen({ artists, tracks, deviceId, player, onBack }) {
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
   const currentTrackRef = useRef(null);
+  const lastPlayedRoundRef = useRef(0);
 
   // Game configuration
   const config = testMode
@@ -44,30 +45,26 @@ function GameScreen({ artists, tracks, deviceId, player, onBack }) {
     }
 
     try {
-      // Fetch current device ID fresh each time since they change
-      const devices = await getDevices();
-      const clubDevice = devices.find(d => d.name === 'Club 100 Game Player');
-
-      if (!clubDevice) {
-        console.error('Club 100 Game Player device not found');
+      if (!deviceId) {
         setError('Spotify player disconnected');
         return;
       }
-
-      const currentDeviceId = clubDevice.id;
-      console.log(`Round ${round}: Playing ${track.name} by ${track.artist_name} on device ${currentDeviceId}`);
-      await playMinute(currentDeviceId, track.uri, track.duration_ms);
+      console.log(`Round ${round}: Playing ${track.name} by ${track.artist_name} on device ${deviceId}`);
+      await playMinute(deviceId, track.uri, track.duration_ms);
     } catch (err) {
       console.error(`Failed to play round ${round}:`, err);
       setError(`Playback error: ${err.message}`);
     }
-  }, [getCurrentTrack]);
+  }, [deviceId, getCurrentTrack]);
 
   // Timer logic with drift correction
   const startTimer = useCallback(() => {
     startTimeRef.current = Date.now();
+    lastPlayedRoundRef.current = 1;
     setGameState('playing');
     setError(null);
+    setCurrentRound(1);
+    setTimeRemaining(Math.ceil(config.intervalMs / 1000));
 
     // Play first round immediately
     playCurrentRound(1);
@@ -77,27 +74,26 @@ function GameScreen({ artists, tracks, deviceId, player, onBack }) {
       const round = Math.floor(elapsed / config.intervalMs) + 1;
 
       if (round > config.maxRounds) {
-        // Game finished
         setGameState('finished');
         setCurrentRound(config.maxRounds);
         setTimeRemaining(0);
         return;
       }
 
+      // Update countdown for current round
+      const nextRoundStart = round * config.intervalMs;
+      const remainingMs = Math.max(0, nextRoundStart - elapsed);
       setCurrentRound(round);
+      setTimeRemaining(Math.ceil(remainingMs / 1000));
 
-      // Calculate time remaining in current round
-      const roundElapsed = elapsed % config.intervalMs;
-      const roundRemaining = config.intervalMs - roundElapsed;
-      setTimeRemaining(Math.ceil(roundRemaining / 1000));
-
-      // Play track if we've moved to a new round
-      if (round > 1 && Math.floor((elapsed - config.intervalMs) / config.intervalMs) + 1 < round) {
+      // Only trigger playback once per round
+      if (round !== lastPlayedRoundRef.current) {
+        lastPlayedRoundRef.current = round;
         playCurrentRound(round);
       }
 
-      // Schedule next tick
-      const nextTickDelay = roundRemaining % 1000 || 1000;
+      // Schedule next tick; cap at 1s for smooth countdown
+      const nextTickDelay = Math.min(1000, Math.max(100, remainingMs));
       timerRef.current = setTimeout(tick, nextTickDelay);
     };
 
@@ -131,6 +127,7 @@ function GameScreen({ artists, tracks, deviceId, player, onBack }) {
     // Recalculate timing based on current round
     const elapsed = (currentRound - 1) * config.intervalMs;
     startTimeRef.current = Date.now() - elapsed;
+    lastPlayedRoundRef.current = currentRound;
     setGameState('playing');
 
     // Resume playback
@@ -138,10 +135,10 @@ function GameScreen({ artists, tracks, deviceId, player, onBack }) {
       player.resume();
     }
 
-    // Restart timer
+    // Restart timer loop
     const tick = () => {
-      const newElapsed = Date.now() - startTimeRef.current;
-      const round = Math.floor(newElapsed / config.intervalMs) + 1;
+      const elapsedSinceResume = Date.now() - startTimeRef.current;
+      const round = Math.floor(elapsedSinceResume / config.intervalMs) + 1;
 
       if (round > config.maxRounds) {
         setGameState('finished');
@@ -150,13 +147,18 @@ function GameScreen({ artists, tracks, deviceId, player, onBack }) {
         return;
       }
 
+      const nextRoundStart = round * config.intervalMs;
+      const remainingMs = Math.max(0, nextRoundStart - elapsedSinceResume);
       setCurrentRound(round);
+      setTimeRemaining(Math.ceil(remainingMs / 1000));
 
-      const roundElapsed = newElapsed % config.intervalMs;
-      const roundRemaining = config.intervalMs - roundElapsed;
-      setTimeRemaining(Math.ceil(roundRemaining / 1000));
+      // Playback only when entering a new round
+      if (round !== lastPlayedRoundRef.current) {
+        lastPlayedRoundRef.current = round;
+        playCurrentRound(round);
+      }
 
-      const nextTickDelay = roundRemaining % 1000 || 1000;
+      const nextTickDelay = Math.min(1000, Math.max(100, remainingMs));
       timerRef.current = setTimeout(tick, nextTickDelay);
     };
 
@@ -169,6 +171,7 @@ function GameScreen({ artists, tracks, deviceId, player, onBack }) {
     setCurrentRound(1);
     setTimeRemaining(0);
     setError(null);
+    lastPlayedRoundRef.current = 0;
   };
 
   // Cleanup on unmount

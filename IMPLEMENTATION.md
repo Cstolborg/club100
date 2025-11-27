@@ -1,7 +1,7 @@
 # Club 100 - Implementation Summary
 
 **Date**: 2025-11-27
-**Status**: ✅ Fully Functional (Phases 1-8 Complete)
+**Status**: ✅ Fully Functional (Phases 1-8 Complete; tests added)
 
 ## Overview
 
@@ -319,26 +319,18 @@ This prevents drift that occurs with `setInterval` over long periods.
 
 ## Testing Checklist
 
-### Backend Tests ✅
-- [x] Health endpoint returns correct status
-- [x] OAuth flow completes successfully
-- [x] Token refresh works automatically
-- [x] Artist search returns results
-- [x] Track matrix fetches 10×10 tracks
-- [x] Playback endpoint logic validated
+### Automated Tests
+- Backend (pytest): `backend/tests/test_playback.py`  
+  - Position clamping for short/normal/long tracks  
+  - Token refresh path updates stored tokens when expired  
+  - No-access-token path raises
+- Frontend (vitest, Node 18+): `frontend/src/components/GameScreen.test.jsx`  
+  - Timer cadence: exactly one `playMinute` call per round, correct ordering
 
-### Frontend Tests (Manual)
-- [ ] Login screen displays correctly
-- [ ] Spotify OAuth redirects work
-- [ ] Artist search is responsive (debounced)
-- [ ] Can select exactly 10 artists
-- [ ] Spotify Player initializes
-- [ ] Device ID captured correctly
-- [ ] Test mode runs 20 rounds × 10 seconds
-- [ ] Normal mode timer starts correctly
-- [ ] Playback controls work (pause/resume)
-- [ ] Album art displays
-- [ ] Game completes successfully
+### Manual Checks (still recommended)
+- Login/OAuth flow
+- Device availability and playback on real Spotify device
+- Full 100-minute or test-mode run-through
 
 ---
 

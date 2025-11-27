@@ -7,6 +7,7 @@ Comprehensive testing guide for the Club 100 backend API.
 1. [Prerequisites](#prerequisites)
 2. [Manual Testing](#manual-testing)
 3. [Automated Testing with Subagent](#automated-testing-with-subagent)
+4. [Automated Tests (pytest)](#automated-tests-pytest)
 4. [Testing Scenarios](#testing-scenarios)
 5. [Expected Responses](#expected-responses)
 6. [Troubleshooting](#troubleshooting)
@@ -32,6 +33,9 @@ Comprehensive testing guide for the Club 100 backend API.
    - `curl` for command-line testing
    - Browser for OAuth flow
    - Or use FastAPI's `/docs` interface
+
+4. **Virtual environment:**
+   - Use the provided uv-managed venv at `backend/.venv`
 
 ---
 
@@ -222,6 +226,23 @@ curl -X POST http://localhost:8000/api/play-minute \
 # Position should be max(0, min(18000, 20000)) = 18000
 # Ensures at least 10 seconds remaining
 ```
+
+---
+
+## Automated Tests (pytest)
+
+Unit coverage for playback position clamping and token refresh logic.
+
+```bash
+source backend/.venv/bin/activate
+cd backend
+pytest
+```
+
+What’s covered:
+- `play_minute` position calculation for short/normal/long tracks
+- `get_fresh_token` refresh path (updates stored tokens when expired)
+- No-access-token path raises as expected
 
 ---
 

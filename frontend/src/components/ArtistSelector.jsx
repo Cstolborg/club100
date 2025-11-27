@@ -73,7 +73,9 @@ function ArtistSelector({ onArtistsSelected, onPlayerReady }) {
         // to register with Spotify's backend API
         const verifyDeviceRegistered = async () => {
           let attempts = 0;
-          const maxAttempts = 40; // Poll for up to 40 seconds
+          const maxAttempts = 20; // Poll with backoff for up to ~40s
+          let delayMs = 1500;
+          const maxDelayMs = 6000;
 
           const checkDevice = async () => {
             attempts++;
@@ -105,7 +107,9 @@ function ArtistSelector({ onArtistsSelected, onPlayerReady }) {
                 return true;
               } else if (attempts < maxAttempts) {
                 console.log(`✗ Device not found yet, retrying...`);
-                setTimeout(checkDevice, 1000); // Check every second
+                const nextDelay = Math.min(maxDelayMs, delayMs);
+                delayMs = Math.min(maxDelayMs, Math.floor(delayMs * 1.4));
+                setTimeout(checkDevice, nextDelay);
               } else {
                 console.error('⚠️ Device registration timeout - proceeding anyway');
                 console.error(`Expected device_id: ${device_id}`);
@@ -116,7 +120,12 @@ function ArtistSelector({ onArtistsSelected, onPlayerReady }) {
             } catch (err) {
               console.error('Error checking devices:', err);
               if (attempts < maxAttempts) {
-                setTimeout(checkDevice, 1000);
+                const nextDelay =
+                  err.status === 429
+                    ? Math.max(delayMs * 2, 3000)
+                    : Math.min(maxDelayMs, delayMs);
+                delayMs = Math.min(maxDelayMs, Math.floor(nextDelay * 1.1));
+                setTimeout(checkDevice, nextDelay);
               } else {
                 setPlayerReady(true);
                 onPlayerReady(player, device_id);

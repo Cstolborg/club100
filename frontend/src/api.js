@@ -94,7 +94,14 @@ export const getDevices = async () => {
     return response.data.devices;
   } catch (error) {
     console.error('Failed to get devices:', error);
-    throw new Error('Failed to get devices. Please try again.');
+    const status = error.response?.status;
+    const message =
+      status === 429
+        ? 'Rate limited while fetching devices. Waiting before retrying.'
+        : 'Failed to get devices. Please try again.';
+    const err = new Error(message);
+    err.status = status;
+    throw err;
   }
 };
 

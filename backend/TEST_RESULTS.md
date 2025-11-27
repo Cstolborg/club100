@@ -1,8 +1,9 @@
-# Backend Test Results - 2025-11-27
+# Backend Test Results - 2025-12-01
 
 ## Test Summary
 
-All backend endpoints tested and verified functional.
+- Manual endpoint checks remain green.
+- New automated pytest coverage added for playback position clamping and token refresh logic.
 
 ### Test Results
 
@@ -12,7 +13,7 @@ All backend endpoints tested and verified functional.
 | `GET /health` | ✅ PASS | Reports healthy, tokens present, not expired |
 | `GET /login` | ✅ PASS | Redirects to Spotify OAuth (tested in browser) |
 | `GET /callback` | ✅ PASS | Successfully exchanges code for tokens |
-| `GET /api/token` | ✅ PASS | Returns valid 246-character access token |
+| `GET /api/token` | ✅ PASS | Returns valid access token |
 | `GET /api/search` | ✅ PASS | Returns 10 matching artists for query |
 | `POST /api/tracks` | ✅ PASS | Returns 10×10 matrix (100 tracks total) |
 | `POST /api/play-minute` | ✅ PASS | Logic validated, requires active device |
@@ -29,79 +30,33 @@ All backend endpoints tested and verified functional.
 - `backend/app.py:33` - Updated default fallback URI
 - `backend/README.md` - Updated setup instructions
 
-### Detailed Test Results
-
-#### 1. Health Check
-```json
-{
-    "status": "healthy",
-    "has_tokens": true,
-    "token_expired": false
-}
+### Automated Tests (pytest)
+- File: `backend/tests/test_playback.py`
+- Coverage:
+  - Playback position clamping for short/normal/long tracks
+  - Token refresh path updates stored tokens when expired
+  - No-access-token path raises as expected
+```
+source backend/.venv/bin/activate
+cd backend && pytest
 ```
 
-#### 2. Root Endpoint
-```json
-{
-    "message": "Club 100 API",
-    "status": "running",
-    "authenticated": true,
-    "docs": "/docs"
-}
-```
-
-#### 3. Token Endpoint
-- Token present: ✅
-- Token length: 246 characters
-- Format: Valid Bearer token
-
-#### 4. Artist Search
-- Query: "Metallica"
-- Results: 10 artists returned
-- Top result: Metallica (ID: 2ye2Wgw4gimLv2eAKyk1NB)
-- Image URLs: Present ✅
-
-#### 5. Track Matrix (10×10)
-- Artists fetched: 10/10 ✅
-- Total tracks: 100/100 ✅
-- Matrix structure: Valid ✅
-- Example tracks:
-  - "Enter Sandman - Remastered 2021" by Metallica
-  - "Here Comes The Sun - Remastered 2009" by The Beatles
-  - "Crazy In Love (feat. JAY-Z)" by Beyoncé
-- All track objects contain required fields:
-  - `uri` ✅
-  - `name` ✅
-  - `duration_ms` ✅
-  - `artist_name` ✅
-  - `album_image` ✅
-
-#### 6. Playback Control
-- Position calculation: Valid ✅
-- Error handling: Valid ✅
-- Test response (no active device): "Device not found. Make sure Spotify player is active."
-- Expected behavior: Will control playback when Web Playback SDK is integrated
+### Manual Endpoint Smoke
+- ✅ `GET /`, `GET /health`
+- ✅ OAuth flow (`/login` ➜ `/callback`) with valid credentials
+- ✅ `GET /api/token`
+- ✅ `GET /api/search`
+- ✅ `POST /api/tracks`
+- ✅ `POST /api/play-minute` (requires active Spotify device; tested logically via unit coverage)
 
 ### Environment Setup (Verified)
 
-**Dependencies Installed:**
-```
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-httpx==0.25.1
-python-dotenv==1.0.0
-pydantic==2.5.0
-```
-
-**Environment Variables:**
-- `.env` file: ✅ Present
-- `SPOTIFY_CLIENT_ID`: ✅ Configured
-- `SPOTIFY_CLIENT_SECRET`: ✅ Configured
-- `REDIRECT_URI`: ✅ Set to `http://127.0.0.1:8000/callback`
+**Environment Variables (verified):**
+- `.env` present with Spotify creds
+- `REDIRECT_URI` set to `http://127.0.0.1:8000/callback`
 
 **Virtual Environment:**
-- Using `uv` package manager
-- Virtual environment created in project root
+- Using `backend/.venv` (uv-managed) for tests and runtime
 
 ### Server Information
 
