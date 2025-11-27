@@ -8,7 +8,7 @@ Start both backend and frontend development servers:
    - Use `npm run dev` from frontend directory
 5. Wait 3 seconds and verify both servers are running
 6. Report the URLs:
-   - Backend: http://localhost:8000
-   - Backend API Docs: http://localhost:8000/docs
-   - Frontend: http://localhost:3000 (or whatever Vite assigns)
+   - Backend: http://127.0.0.1:8000
+   - Backend API Docs: http://127.0.0.1:8000/docs
+   - Frontend: http://127.0.0.1:3000 or http://127.0.0.1:5173 (Vite default)
 7. Provide instructions to stop servers when done

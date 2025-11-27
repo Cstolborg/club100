@@ -30,7 +30,7 @@ load_dotenv()
 # Environment variables
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
-REDIRECT_URI = os.getenv("REDIRECT_URI", "http://localhost:8000/callback")
+REDIRECT_URI = os.getenv("REDIRECT_URI", "http://127.0.0.1:8000/callback")
 MARKET = os.getenv("MARKET", "US")
 
 # Validate required environment variables

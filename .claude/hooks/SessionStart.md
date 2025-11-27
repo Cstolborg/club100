@@ -18,8 +18,9 @@ Automatically orient the assistant when starting a new session on Club 100 proje
 
 4. **Helpful Reminders:**
    - Available slash commands: /status, /check-deps, /start-dev, /test-backend, /test-spotify-auth
-   - CLAUDE.md contains full specification and implementation checklist
-   - See Phase 1-9 checklist for structured implementation path
+   - CLAUDE.md contains full specification and implementation checklist (Phases 1-4 ✅ complete)
+   - Backend API docs: http://127.0.0.1:8000/docs (when running)
+   - See Phase 5-9 checklist for frontend implementation
 
 5. **Do NOT:**
    - Start implementing anything automatically

@@ -51,11 +51,11 @@ cp .env.example .env
 ```bash
 SPOTIFY_CLIENT_ID=your_client_id_here
 SPOTIFY_CLIENT_SECRET=your_client_secret_here
-REDIRECT_URI=http://localhost:8000/callback
+REDIRECT_URI=http://127.0.0.1:8000/callback
 MARKET=US  # Optional, defaults to US
 ```
 
-**Important:** Add `http://localhost:8000/callback` to your Spotify app's Redirect URIs in the dashboard.
+**Important:** Add `http://127.0.0.1:8000/callback` to your Spotify app's Redirect URIs in the dashboard. Spotify requires explicit IP addresses (not "localhost"). See [Spotify Redirect URI Requirements](https://developer.spotify.com/documentation/web-api/concepts/redirect_uri).
 
 ### 4. Run the Server
 
