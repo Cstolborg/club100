@@ -8,6 +8,7 @@ function GameScreen({ artists, tracks, deviceId, player, onBack }) {
   const [testMode, setTestMode] = useState(false);
   const [error, setError] = useState(null);
   const [timeRemaining, setTimeRemaining] = useState(0);
+  const [showBeerFlash, setShowBeerFlash] = useState(false);
 
   const startTimeRef = useRef(null);
   const timerRef = useRef(null);
@@ -181,6 +182,15 @@ function GameScreen({ artists, tracks, deviceId, player, onBack }) {
     };
   }, [stopTimer]);
 
+  // Show beer flash on every 10th round
+  useEffect(() => {
+    if (gameState === 'playing' && currentRound > 0 && currentRound % 10 === 0) {
+      setShowBeerFlash(true);
+      const timeout = setTimeout(() => setShowBeerFlash(false), 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [currentRound, gameState]);
+
   const progress = (currentRound / config.maxRounds) * 100;
 
   return (
@@ -295,6 +305,16 @@ function GameScreen({ artists, tracks, deviceId, player, onBack }) {
             <button className="secondary" onClick={onBack}>
               ← Change Artists
             </button>
+          </div>
+        </div>
+      )}
+
+      {showBeerFlash && (
+        <div className="beer-flash-overlay">
+          <div className="beer-flash-content">
+            <div className="beer-icon-huge">🍺</div>
+            <h1 className="beer-flash-text">ROUND {currentRound}!</h1>
+            <p className="beer-flash-subtext">10 rounds down!</p>
           </div>
         </div>
       )}

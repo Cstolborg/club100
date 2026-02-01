@@ -249,6 +249,102 @@
   padding: 12px 32px;
 }
 
+/* Beer Flash Overlay - Shows every 10th round */
+.beer-flash-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: overlayFadeIn 0.3s ease-out;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.beer-flash-content {
+  text-align: center;
+  animation: contentBounce 0.5s ease-out;
+}
+
+@keyframes contentBounce {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.beer-icon-huge {
+  font-size: 12rem;
+  animation: beerFlash 0.5s ease-in-out infinite alternate, beerBounce 0.3s ease-in-out infinite;
+  filter: drop-shadow(0 0 40px rgba(255, 193, 7, 0.8));
+}
+
+@keyframes beerFlash {
+  0% {
+    transform: scale(1) rotate(-5deg);
+    filter: drop-shadow(0 0 40px rgba(255, 193, 7, 0.8)) brightness(1);
+  }
+  100% {
+    transform: scale(1.15) rotate(5deg);
+    filter: drop-shadow(0 0 80px rgba(255, 193, 7, 1)) brightness(1.3);
+  }
+}
+
+@keyframes beerBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.beer-flash-text {
+  font-size: 4rem;
+  font-weight: 900;
+  color: #ffc107;
+  text-shadow: 0 0 30px rgba(255, 193, 7, 0.8), 0 0 60px rgba(255, 193, 7, 0.5);
+  animation: textPulse 0.5s ease-in-out infinite alternate;
+  margin: 1rem 0;
+}
+
+@keyframes textPulse {
+  0% {
+    transform: scale(1);
+    text-shadow: 0 0 30px rgba(255, 193, 7, 0.8), 0 0 60px rgba(255, 193, 7, 0.5);
+  }
+  100% {
+    transform: scale(1.05);
+    text-shadow: 0 0 50px rgba(255, 193, 7, 1), 0 0 100px rgba(255, 193, 7, 0.8);
+  }
+}
+
+.beer-flash-subtext {
+  font-size: 1.8rem;
+  color: #1db954;
+  font-weight: 700;
+  text-shadow: 0 0 20px rgba(29, 185, 84, 0.5);
+}
+
 @media (max-width: 768px) {
   .album-art {
     width: 250px;
@@ -278,5 +374,17 @@
   .final-stats {
     flex-direction: column;
     gap: 1.5rem;
+  }
+
+  .beer-icon-huge {
+    font-size: 8rem;
+  }
+
+  .beer-flash-text {
+    font-size: 2.5rem;
+  }
+
+  .beer-flash-subtext {
+    font-size: 1.2rem;
   }
 }
